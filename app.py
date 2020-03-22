@@ -7,9 +7,9 @@ from dash.dependencies import Input, Output
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-
-data = getData()
-print("Get data")
+days = 1
+data = getData(days)
+print("Get initial data")
 datapoints = len(data['Humidity'])
 
 figHum = px.line(data, x="Timestamp", y="Humidity", title="Luftfeuchtigkeit über die letzten 3 Tage")
@@ -30,27 +30,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             'color': colors['text']
         }
     ),
-    html.H6(
-        children='Letzte Messung: ' + str(data['Timestamp'][datapoints-1]),
-        style={
-            'textAlign': 'center',
-            'color': colors['text']
-        }
-    ),
-    html.H3(
-        children='Luftfeuchtigkeit: ' + str(data['Humidity'][datapoints-1]) + "%",
-        style={
-            'textAlign': 'center',
-            'color': colors['text']
-        }
-    ),
-    html.H3(
-        children='Temperatur: ' + str(data['Temperature'][datapoints-1]) + "°C",
-        id="text-temp",
-        style={
-            'textAlign': 'center',
-            'color': colors['text']
-        }
+    html.Div(
+        id="currentDescription"
     ),
     dcc.Graph(
         id='hum-graph',
@@ -68,34 +49,59 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     ),
     dcc.Interval(
         id='interval-component',
-        interval=300000, # in milliseconds
+        interval=600*1000, # in milliseconds
         n_intervals=0
     )
 ])
 
-@app.callback(Output('text-temp', 'children'),
+@app.callback(Output('currentDescription', 'children'),
               [Input('interval-component', 'n_intervals')])
 def updateTempText(n):
-    data = getData()
+    data = getData(days)
     print("Get data")
     datapoints = len(data['Humidity'])
 
-    figHum = px.line(data, x="Timestamp", y="Humidity", title="Luftfeuchtigkeit über die letzten 3 Tage")
     return(
-        html.H1(
-            children='Temperatur: ' + str(data['Temperature'][datapoints-1]) + '°C',
-            style={
-                'textAlign': 'center',
-                'color': colors['text']
-            }
-        )
+        [
+            html.H6(
+                children='Letzte Messung: ' + str(data['Timestamp'][datapoints - 1]),
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text']
+                }
+            ),
+            html.H3(
+                children='Luftfeuchtigkeit: ' + str(data['Humidity'][datapoints - 1]) + "%",
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text']
+                }
+            ),
+            html.H3(
+                children='Temperatur: ' + str(data['Temperature'][datapoints - 1]) + "°C",
+                id="text-temp",
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text']
+                }
+            ),
+        ]
     )
 
-@app.callback(Output('temp-graph', 'children'),
+@app.callback(Output('temp-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def updateTempGraph(n):
-    figTemp = px.line(data, x="Timestamp", y="Temperature", title="Temperatur über die letzten 3 Tage")
+    print(len(data))
+    print(datapoints)
+    figTemp = px.line(data, x="Timestamp", y="Temperature", title="Temperatur über die letzten " + str(days) + " Tage")
     return figTemp
+
+@app.callback(Output('hum-graph', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def updateTempGraph(n):
+    figHum = px.line(data, x="Timestamp", y="Humidity", title="Luftfeuchtigkeit über die letzten " + str(days) + " Tage")
+    return figHum
+
 
 if __name__ == '__main__':
     app.run_server(host="0.0.0.0", debug=False)

@@ -11,8 +11,8 @@ firebase_admin.initialize_app(cred, {
 
 db = firestore.client()
 
-def getData():
-    x = datetime.today() - timedelta(days=3)
+def getData(days):
+    x = datetime.today() - timedelta(days)
     docs = db.collection(u'sensorData').where('timestamp', u'>=', x).stream();
 
     data = {'Humidity': [], 'Temperature': [], 'Timestamp': []}

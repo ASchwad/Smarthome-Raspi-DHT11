@@ -3,6 +3,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import datetime
 import time
+#TODO: Catch non readable sensor output to continue script; Change evaluation time to every 15 minutes
+
 #Has to be run with 'python3.7 SensorScript.py 11 4' for the used pins on the raspberry pi
 cred = credentials.Certificate('raspihome.json')
 
