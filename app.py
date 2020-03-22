@@ -1,15 +1,14 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from FirebaseManager import getData
 import plotly.express as px
 from dash.dependencies import Input, Output
+from FirebaseManager import getData
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 days = 1
 data = getData(days)
-print("Get initial data")
 datapoints = len(data['Humidity'])
 
 figHum = px.line(data, x="Timestamp", y="Humidity", title="Luftfeuchtigkeit über die letzten 3 Tage")
@@ -58,13 +57,11 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
               [Input('interval-component', 'n_intervals')])
 def updateTempText(n):
     data = getData(days)
-    print("Get data")
     datapoints = len(data['Humidity'])
-
     return(
         [
             html.H6(
-                children='Letzte Messung: ' + str(data['Timestamp'][datapoints - 1]),
+                children='Letzte Messung: ' + data['Timestamp'][datapoints - 1].strftime("%Y-%m-%d %H:%M:%S"),
                 style={
                     'textAlign': 'center',
                     'color': colors['text']
@@ -91,14 +88,12 @@ def updateTempText(n):
 @app.callback(Output('temp-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
 def updateTempGraph(n):
-    print(len(data))
-    print(datapoints)
     figTemp = px.line(data, x="Timestamp", y="Temperature", title="Temperatur über die letzten " + str(days) + " Tage")
     return figTemp
 
 @app.callback(Output('hum-graph', 'figure'),
               [Input('interval-component', 'n_intervals')])
-def updateTempGraph(n):
+def updateHumGraph(n):
     figHum = px.line(data, x="Timestamp", y="Humidity", title="Luftfeuchtigkeit über die letzten " + str(days) + " Tage")
     return figHum
 
